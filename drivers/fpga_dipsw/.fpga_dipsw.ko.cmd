@@ -1,0 +1,1 @@
+cmd_/cygdrive/c/AndroXStudio/workspace/fpga_dipsw/fpga_dipsw.ko := arm-linux-androideabi-ld -EL -r                                   -T /platform/linux/scripts/module-common.lds --build-id   -o /cygdrive/c/AndroXStudio/workspace/fpga_dipsw/fpga_dipsw.ko /cygdrive/c/AndroXStudio/workspace/fpga_dipsw/fpga_dipsw.o /cygdrive/c/AndroXStudio/workspace/fpga_dipsw/fpga_dipsw.mod.o
