@@ -1,1 +1,0 @@
-cmd_/home/isu20/source/drivers/fpga_led/fpga_led.ko := arm-linux-gnueabi-ld -EL -r  -T /home/isu20/source/platform/linux/scripts/module-common.lds --build-id  -o /home/isu20/source/drivers/fpga_led/fpga_led.ko /home/isu20/source/drivers/fpga_led/fpga_led.o /home/isu20/source/drivers/fpga_led/fpga_led.mod.o
