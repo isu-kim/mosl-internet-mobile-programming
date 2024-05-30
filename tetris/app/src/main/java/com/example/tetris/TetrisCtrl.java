@@ -301,6 +301,13 @@ public class TetrisCtrl extends View {
 
         poxY += (int)(fontSize * 1.5);
         canvas.drawText("Top Score : " + mTopScore, posX, poxY, pnt);
+        // Memo: Insert Text-LCD-Code and 7seg-code here
+        // TextLCD:
+        // User-ID: 048b
+        // Top Score: 32
+        //
+        // 7seg:
+        // 13
     }
 
     void showMatrix(Canvas canvas, int[][] arMatrix, boolean drawEmpth) {
@@ -375,6 +382,7 @@ public class TetrisCtrl extends View {
         addNewBlock(mArNextBlock);
         TimerGapNormal = TimerGapStart;
         mTimerFrame.sendEmptyMessageDelayed(0, 10);
+        // Memo: Get dipswitch ID here and get top score from aws
     }
 
     /*** Interface end ***/
@@ -426,6 +434,7 @@ public class TetrisCtrl extends View {
                 TimerGapNormal -= 2;
                 mTimerGap = TimerGapNormal;
                 if( isGameOver() ) {
+                    //Memo: Upload Top Score with USER ID
                     showDialog_GameOver();
                     return;
                 }

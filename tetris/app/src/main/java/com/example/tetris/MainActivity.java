@@ -81,6 +81,9 @@ public class MainActivity extends Activity {
             case KeyEvent.KEYCODE_2:
                 mTetrisCtrl.userRestart();
                 return true;
+            case KeyEvent.KEYCODE_8:
+                mTetrisCtrl.block2Bottom();
+                return true;
             default:
                 return super.onKeyUp(keyCode, event);
         }
