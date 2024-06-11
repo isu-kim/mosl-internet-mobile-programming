@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -21,6 +22,13 @@ public class MainActivity extends Activity {
     int mCellSize = 0;
     boolean mIsTouchMove = false;
 
+    // Used to load the 'hb_test' library on application startup.
+    static {
+        System.loadLibrary("tetris");
+    }
+
+    public native String stringFromJNI();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,6 +36,11 @@ public class MainActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(this /* MyActivity */, stringFromJNI(), duration);
+        toast.show();
 
         DisplayMetrics dm = this.getApplicationContext().getResources().getDisplayMetrics();
         mScreenSize.x = dm.widthPixels;
