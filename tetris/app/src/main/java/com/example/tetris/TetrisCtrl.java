@@ -340,6 +340,15 @@ public class TetrisCtrl extends View {
 
         poxY += (int)(fontSize * 1.5);
         canvas.drawText("Top Score : " + mTopScore, posX, poxY, pnt);
+        poxY += (int)(fontSize * 1.5);
+
+        String userString = "unknown";
+        if (hwc.dc.GetUserID() == -1) {
+            userString = "unknown";
+        } else {
+            userString = String.valueOf(hwc.dc.GetUserID());
+        }
+        canvas.drawText("User ID : "+ userString, posX, poxY, pnt);
         // Memo: Insert Text-LCD-Code and 7seg-code here
         // TextLCD:
         // User-ID: 048b
