@@ -402,7 +402,6 @@ public class TetrisCtrl extends View {
         initiatedRestart = 0;
 
         this.hwc.pc.StopTetrisTheme();
-
         mDlgMsg = new AlertDialog.Builder(context)
                 .setTitle("Notice")
                 .setMessage("Game over! Your score is " + mScore)

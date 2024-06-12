@@ -194,6 +194,7 @@ public class PiezoClass {
      */
     public void StopTetrisTheme() {
         this.setPlaying(false);
+        this.writePizeo((char) REST);
         this.closePizeo();
     }
 }
