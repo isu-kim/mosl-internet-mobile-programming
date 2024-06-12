@@ -117,6 +117,10 @@ public class PiezoClass {
         int thisNote = 0;
 
         while (this.isPlaying()) {
+            if (thisNote >= melody.length - 1) {
+                thisNote = 0;
+            }
+
             int wholeNote = 60000 * 4 / getTempo();
             int divider = 0;
             int noteDuration = 0;
