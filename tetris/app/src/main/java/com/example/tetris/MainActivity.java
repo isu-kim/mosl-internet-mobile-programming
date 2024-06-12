@@ -1,7 +1,9 @@
 package com.example.tetris;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.graphics.Bitmap;
+import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Bundle;

@@ -12,6 +12,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
 import com.example.hardware.HWClass;
@@ -46,6 +47,38 @@ public class TetrisCtrl extends View {
     public int initiatedRestart = 0;
 
     private HWClass hwc;
+
+    private void showUserIDSelectionDialog() {
+        hwc.dc.Open();
+        final int[] userID = {hwc.dc.GetValue()};
+        hwc.dc.Close();
+
+        this.pauseGame();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setMessage("USER ID: " + userID[0])
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Do nothing but close the dialog
+                        hwc.dc.SetUserID(userID[0]);
+                        Log.i("info", "ID set +" + hwc.dc.GetUserID());
+                        dialog.dismiss();
+                        restartGame();
+                    }
+                })
+                .setNegativeButton("Refresh ID", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Update the message with the new user ID
+                        hwc.dc.Open();
+                        userID[0] = hwc.dc.GetValue();
+                        hwc.dc.Close();
+                        showUserIDSelectionDialog();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 
     Rect getBlockArea(int x, int y) {
         Rect rtBlock = new Rect();
@@ -259,7 +292,6 @@ public class TetrisCtrl extends View {
             i--;
         }
 
-
         mScore += filledCount * filledCount;
         if( mTopScore < mScore ) {
             mTopScore = mScore;
@@ -379,7 +411,6 @@ public class TetrisCtrl extends View {
 
     public void startGame() {
         mScore = 0;
-
         for(int i=0; i < MatrixSizeV; i++) {
             for(int j=0; j < MatrixSizeH; j++) {
                 mArMatrix[i][j] = 0;
@@ -394,6 +425,8 @@ public class TetrisCtrl extends View {
         TimerGapNormal = TimerGapStart;
         mTimerFrame.sendEmptyMessageDelayed(0, 10);
         // Memo: Get dipswitch ID here and get top score from aws
+
+        showUserIDSelectionDialog();
     }
 
     /*** Interface end ***/

@@ -2,6 +2,7 @@
 
 #include "piezo.cpp"
 #include "segment.cpp"
+#include "dipsw.cpp"
 
 extern "C"
 JNIEXPORT jstring JNICALL
