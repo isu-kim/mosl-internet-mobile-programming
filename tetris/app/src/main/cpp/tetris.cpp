@@ -1,6 +1,7 @@
 #include <jni.h>
 
 #include "piezo.cpp"
+#include "segment.cpp"
 
 extern "C"
 JNIEXPORT jstring JNICALL

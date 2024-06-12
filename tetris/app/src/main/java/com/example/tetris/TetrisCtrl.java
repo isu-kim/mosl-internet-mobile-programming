@@ -12,8 +12,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
-import android.util.DisplayMetrics;
 import android.view.View;
+
+import com.example.hardware.HWClass;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -44,6 +45,8 @@ public class TetrisCtrl extends View {
     int mTopScore = 0;
     public int initiatedRestart = 0;
 
+    private HWClass hwc;
+
     Rect getBlockArea(int x, int y) {
         Rect rtBlock = new Rect();
         rtBlock.left = (int)(x * mBlockSize);
@@ -66,6 +69,10 @@ public class TetrisCtrl extends View {
         this.context = context;
         mPref = context.getSharedPreferences("info",MODE_PRIVATE);
         mTopScore = mPref.getInt("TopScore", 0);
+    }
+
+    public void SetHWControl(HWClass hwc) {
+        this.hwc = hwc;
     }
 
     void initVariables(Canvas canvas) {
@@ -358,7 +365,7 @@ public class TetrisCtrl extends View {
     public void pauseGame() {
         if( mDlgMsg != null )
             return;
-
+        this.hwc.pc.PauseTetrisTheme();
         mTimerFrame.removeMessages(0);
     }
 
@@ -366,6 +373,7 @@ public class TetrisCtrl extends View {
         if( mDlgMsg != null )
             return;
 
+        this.hwc.pc.ResumeTetrisTheme();
         mTimerFrame.sendEmptyMessageDelayed(0, 1000);
     }
 
@@ -378,6 +386,9 @@ public class TetrisCtrl extends View {
             }
         }
 
+        this.hwc.pc.PlayTetrisTheme();
+        this.hwc.sc.StartScore();
+
         addNewBlock(mArNewBlock);
         addNewBlock(mArNextBlock);
         TimerGapNormal = TimerGapStart;
@@ -389,6 +400,9 @@ public class TetrisCtrl extends View {
 
     void showDialog_GameOver() {
         initiatedRestart = 0;
+
+        this.hwc.pc.StopTetrisTheme();
+
         mDlgMsg = new AlertDialog.Builder(context)
                 .setTitle("Notice")
                 .setMessage("Game over! Your score is " + mScore)
