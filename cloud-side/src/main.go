@@ -20,6 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Database connection failed: %v", err)
 	}
+
 	defer func(db *DB) {
 		err := db.Close()
 		if err != nil {

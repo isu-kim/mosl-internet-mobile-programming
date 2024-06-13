@@ -64,9 +64,9 @@ func uploadScoreHandler(db *DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = db.InsertRecord(user)
+	err = db.UpdateRecord(user)
 	if err != nil {
-		http.Error(w, "error inserting score", http.StatusInternalServerError)
+		http.Error(w, "error updating score", http.StatusInternalServerError)
 		return
 	}
 
@@ -87,7 +87,7 @@ func allScoresHandler(db *DB, w http.ResponseWriter, r *http.Request) {
 func runServer() {
 	// Start the server
 	log.Println("Server is running on port 8080")
-	err := http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe("0.0.0.0:8080", r)
 	if err != nil {
 		return
 	}

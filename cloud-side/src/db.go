@@ -16,30 +16,51 @@ var db *DB
 
 // User represents a user with a UserID and Score
 type User struct {
-	UserID int64
-	Score  int
+	UserID int64 `json:"user_id"`
+	Score  int   `json:"score"`
 }
 
 // NewDB creates a new database connection
 func NewDB(dsn string) (*DB, error) {
+	// Open a database connection
 	mdb, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, logError("error opening database", err)
 	}
-	err = db.Ping()
-	if err != nil {
-		return nil, logError("error verifying connection", err)
-	}
+	// Verify the database connection
+	//err = mdb.Ping()
+	//if err != nil {
+	//		mdb.Close() // Close the connection before returning nil
+	//		return nil, logError("error verifying connection", err)
+	//	}
+
 	log.Println("Connected to the database successfully")
+
+	// Create a new DB instance and assign it to the global db variable
 	ret := &DB{mdb}
 	db = ret
 
 	return ret, nil
 }
 
+// createTableIfNotExists creates the tetris table if it does not exist
+func (db *DB) createTableIfNotExists() error {
+	createTableQuery := `
+	CREATE TABLE IF NOT EXISTS Tetris (
+		ID BIGINT PRIMARY KEY,
+		Score INT
+	)`
+	_, err := db.Exec(createTableQuery)
+	if err != nil {
+		return logError("error creating table", err)
+	}
+	log.Println("Checked for table and created if not exists")
+	return nil
+}
+
 // InsertRecord inserts a record into the database
 func (db *DB) InsertRecord(user User) (int64, error) {
-	insertQuery := "INSERT INTO users (Userid, Score) VALUES (?, ?)"
+	insertQuery := "INSERT INTO Tetris (ID, Score) VALUES (?, ?)"
 	result, err := db.Exec(insertQuery, user.UserID, user.Score)
 	if err != nil {
 		return 0, logError("error inserting record", err)
@@ -54,7 +75,7 @@ func (db *DB) InsertRecord(user User) (int64, error) {
 
 // UpdateRecord updates a record in the database
 func (db *DB) UpdateRecord(user User) error {
-	updateQuery := "UPDATE users SET Score = ? WHERE Userid = ?"
+	updateQuery := "UPDATE Tetris SET Score = ? WHERE ID = ?"
 	_, err := db.Exec(updateQuery, user.Score, user.UserID)
 	if err != nil {
 		return logError("error updating record", err)
@@ -65,7 +86,7 @@ func (db *DB) UpdateRecord(user User) error {
 
 // DeleteRecord deletes a record from the database
 func (db *DB) DeleteRecord(userID int64) error {
-	deleteQuery := "DELETE FROM users WHERE Userid = ?"
+	deleteQuery := "DELETE FROM Tetris WHERE ID = ?"
 	_, err := db.Exec(deleteQuery, userID)
 	if err != nil {
 		return logError("error deleting record", err)
@@ -76,7 +97,9 @@ func (db *DB) DeleteRecord(userID int64) error {
 
 // QueryAllRecords queries all records from the database
 func (db *DB) QueryAllRecords() ([]User, error) {
-	query := "SELECT Userid, Score FROM users"
+	log.Printf("query called")
+
+	query := "SELECT ID, Score FROM Tetris"
 	rows, err := db.Query(query)
 	if err != nil {
 		return nil, logError("error querying all records", err)
