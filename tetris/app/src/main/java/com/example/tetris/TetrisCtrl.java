@@ -292,7 +292,7 @@ public class TetrisCtrl extends View {
             i--;
         }
 
-        mScore += filledCount * filledCount;
+        mScore += filledCount * filledCount * 100;
         if( mTopScore < mScore ) {
             mTopScore = mScore;
             SharedPreferences.Editor edit = mPref.edit();
@@ -349,6 +349,8 @@ public class TetrisCtrl extends View {
             userString = String.valueOf(hwc.dc.GetUserID());
         }
         canvas.drawText("User ID : "+ userString, posX, poxY, pnt);
+
+        hwc.sc.SetScore(mScore);
         // Memo: Insert Text-LCD-Code and 7seg-code here
         // TextLCD:
         // User-ID: 048b
@@ -407,6 +409,7 @@ public class TetrisCtrl extends View {
         if( mDlgMsg != null )
             return;
         this.hwc.pc.PauseTetrisTheme();
+        this.hwc.sc.PauseScoring();
         mTimerFrame.removeMessages(0);
     }
 
@@ -415,11 +418,12 @@ public class TetrisCtrl extends View {
             return;
 
         this.hwc.pc.ResumeTetrisTheme();
+        this.hwc.sc.ResumeScoring();
         mTimerFrame.sendEmptyMessageDelayed(0, 1000);
     }
 
     public void startGame() {
-        mScore = 0;
+        mScore = 1450;
         for(int i=0; i < MatrixSizeV; i++) {
             for(int j=0; j < MatrixSizeH; j++) {
                 mArMatrix[i][j] = 0;
