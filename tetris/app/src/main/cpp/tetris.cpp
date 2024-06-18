@@ -3,6 +3,7 @@
 #include "piezo.cpp"
 #include "segment.cpp"
 #include "dipsw.cpp"
+#include "textlcd.cpp"
 
 extern "C"
 JNIEXPORT jstring JNICALL

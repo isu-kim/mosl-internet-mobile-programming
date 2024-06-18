@@ -5,10 +5,13 @@ public class HWClass {
     public SegmentClass sc;
     public DipswClass dc;
 
+    public TextLCDClass tc;
+
     public HWClass() {
         this.pc = new PiezoClass();
         this.sc = new SegmentClass();
         this.dc = new DipswClass();
+        this.tc = new TextLCDClass();
     }
 
     public void Init() {

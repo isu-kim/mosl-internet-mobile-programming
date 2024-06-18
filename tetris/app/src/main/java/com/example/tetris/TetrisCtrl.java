@@ -48,6 +48,33 @@ public class TetrisCtrl extends View {
 
     private HWClass hwc;
 
+    private void showMusicDebugDialog() {
+        this.pauseGame();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setMessage("[DEBUG] Music ON , yes this is too noisy")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Log the "Yes" choice
+                        Log.i("debug", "Music ON confirmed.");
+                        dialog.dismiss();
+                        restartGame();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Log the "No" choice
+                        Log.i("debug", "Music ON declined.");
+                        dialog.dismiss();
+                        restartGame();
+                        hwc.pc.PauseTetrisTheme();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     private void showUserIDSelectionDialog() {
         hwc.dc.Open();
         final int[] userID = {hwc.dc.GetValue()};
@@ -342,15 +369,18 @@ public class TetrisCtrl extends View {
         canvas.drawText("Top Score : " + mTopScore, posX, poxY, pnt);
         poxY += (int)(fontSize * 1.5);
 
-        String userString = "unknown";
+        String userIdStr = "unknown";
         if (hwc.dc.GetUserID() == -1) {
-            userString = "unknown";
+            userIdStr = "unknown";
         } else {
-            userString = String.valueOf(hwc.dc.GetUserID());
+            userIdStr = String.format("%07d", hwc.dc.GetUserID());
         }
-        canvas.drawText("User ID : "+ userString, posX, poxY, pnt);
+
+        canvas.drawText("User ID : "+ userIdStr, posX, poxY, pnt);
 
         hwc.sc.SetScore(mScore);
+        hwc.tc.printLine1("USER ID: " + userIdStr);
+        hwc.tc.printLine2("Max Score: " + 1234);
         // Memo: Insert Text-LCD-Code and 7seg-code here
         // TextLCD:
         // User-ID: 048b
@@ -432,6 +462,7 @@ public class TetrisCtrl extends View {
 
         this.hwc.pc.PlayTetrisTheme();
         this.hwc.sc.StartScore();
+        this.hwc.tc.Init();
 
         addNewBlock(mArNewBlock);
         addNewBlock(mArNextBlock);
@@ -439,6 +470,8 @@ public class TetrisCtrl extends View {
         mTimerFrame.sendEmptyMessageDelayed(0, 10);
         // Memo: Get dipswitch ID here and get top score from aws
 
+        // @todo, remove this
+        showMusicDebugDialog();
         showUserIDSelectionDialog();
     }
 
