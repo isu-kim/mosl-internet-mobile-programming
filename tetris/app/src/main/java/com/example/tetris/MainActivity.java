@@ -49,9 +49,9 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         // @todo: remove this, just for debugging
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(this /* MyActivity */, stringFromJNI(), duration);
-        toast.show();
+        //int duration = Toast.LENGTH_SHORT;
+        //Toast toast = Toast.makeText(this /* MyActivity */, stringFromJNI(), duration);
+        //toast.show();
         // @todo: till here
 
         DisplayMetrics dm = this.getApplicationContext().getResources().getDisplayMetrics();

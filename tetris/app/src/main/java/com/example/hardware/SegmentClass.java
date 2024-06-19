@@ -70,7 +70,6 @@ public class SegmentClass {
                     break;
                 }
                 if (!isPaused) {
-                    Log.i("SCORE", "JNI" + GetScore());
                     writeSegment(GetScore());
                 }
             }

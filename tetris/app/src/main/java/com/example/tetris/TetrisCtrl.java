@@ -334,6 +334,14 @@ public class TetrisCtrl extends View {
             i--;
         }
 
+        if (filledCount != 0) {
+            new Thread(() -> {
+                for (int i = 0 ; i < 5 ; i++) {
+                    hwc.flc.Blink(255, 255, 255);
+                }
+            }).start();
+        }
+
         mScore += filledCount * filledCount * 100;
         return filledCount;
     }
@@ -490,7 +498,7 @@ public class TetrisCtrl extends View {
         // Memo: Get dipswitch ID here and get top score from aws
 
         // @todo, remove this
-        showMusicDebugDialog();
+        //showMusicDebugDialog();
         showUserIDSelectionDialog();
     }
 
