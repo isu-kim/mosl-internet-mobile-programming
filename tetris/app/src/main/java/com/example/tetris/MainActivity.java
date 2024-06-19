@@ -11,11 +11,13 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 import com.example.hardware.HWClass;
+import com.example.network.AdMgmtClass;
 
 public class MainActivity extends Activity {
     TetrisCtrl mTetrisCtrl;
@@ -26,6 +28,8 @@ public class MainActivity extends Activity {
 
     // JNI Methods
     HWClass hwc = new HWClass();
+    AdMgmtClass amc = new AdMgmtClass("http://aws.bongers.kr");
+
 
     static {
         System.loadLibrary("tetris");
@@ -53,7 +57,42 @@ public class MainActivity extends Activity {
         mScreenSize.y = dm.heightPixels;
         mCellSize = (int)(mScreenSize.x / 8);
 
+        initAd();
         initTetrisCtrl();
+    }
+    void initAd() {
+        new Thread(() -> {
+            try {
+                this.amc.requestIndexHtml();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.i("ADS", "failed to retrieve index");
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (this.amc.isPlaying) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                try {
+                    Bitmap img = this.amc.getRandomAd();
+                    Log.i("AD", "downloaded img");
+
+                    // Update the ImageView on the UI thread
+                    runOnUiThread(() -> {
+                        ImageView ad = findViewById(R.id.adSection);
+                        ad.setImageBitmap(img);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("AD", e.toString());
+                }
+            }
+        }).start();
     }
 
     void initTetrisCtrl() {
