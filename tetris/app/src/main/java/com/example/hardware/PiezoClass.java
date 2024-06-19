@@ -2,6 +2,8 @@ package com.example.hardware;
 
 import static com.example.hardware.PiezoClass.Notes.*;
 
+import android.util.Log;
+
 public class PiezoClass {
     /**
      * Note definition for HB FPGA Piezo
@@ -48,17 +50,15 @@ public class PiezoClass {
     };
 
     private volatile boolean isPlaying = true;
+    private volatile boolean isPaused = false;
     private int tempo = 144;
-
-
     private native void openPizeo();
     private native void writePizeo(char data);
     private native void closePizeo();
 
 
     public PiezoClass() {
-        System.loadLibrary("hb_test");
-        openPizeo();
+        System.loadLibrary("tetris");
     }
 
     /**
@@ -75,6 +75,22 @@ public class PiezoClass {
      */
     public synchronized void setPlaying(boolean isPlaying) {
         this.isPlaying = isPlaying;
+    }
+
+    /**
+     * Check if music is paused
+     * @return isPaused
+     */
+    public synchronized boolean isPaused() {
+        return isPaused;
+    }
+
+    /**
+     * Set music playing pause.
+     * @param isPaused The value to set.
+     */
+    public synchronized void setIsPaused(boolean isPaused) {
+        this.isPaused = isPaused;
     }
 
     /**
@@ -98,13 +114,18 @@ public class PiezoClass {
      * game itself
      */
     private void loopTetrisTheme() {
-        while (isPlaying()) {
-            int notes = melody.length / 2;
+        int thisNote = 0;
+
+        while (this.isPlaying()) {
+            if (thisNote >= melody.length - 1) {
+                thisNote = 0;
+            }
+
             int wholeNote = 60000 * 4 / getTempo();
             int divider = 0;
             int noteDuration = 0;
 
-            for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+            if (!this.isPaused()) {
                 divider = melody[thisNote + 1];
                 if (divider > 0) {
                     noteDuration = wholeNote / divider;
@@ -121,7 +142,7 @@ public class PiezoClass {
                     Thread.currentThread().interrupt();
                 }
 
-                this.writePizeo((char) 0x00);
+                thisNote = thisNote+2;
             }
         }
     }
@@ -130,13 +151,13 @@ public class PiezoClass {
      * Starts playing tetris theme in another thread
      */
     public void PlayTetrisTheme() {
+        this.isPlaying = true;
         Thread tetrisThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     openPizeo();
                     loopTetrisTheme();
-                    closePizeo();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -146,10 +167,35 @@ public class PiezoClass {
     }
 
     /**
-     * Stops Tetris theme
+     * Resumes playing the Tetris theme.
+     */
+    public void ResumeTetrisTheme() {
+        this.setIsPaused(false);
+    }
+
+    /**
+     * Adjusts Tetris theme playing speed
+     * @param bpm The integer value of BPM to play tetris
+     */
+    public void AdjustTetrisTheme(int bpm) {
+        this.setTempo(bpm);
+    }
+
+    /**
+     * Pause Tetris theme
+     */
+    public void PauseTetrisTheme() {
+        this.setIsPaused(true);
+        this.writePizeo((char) REST);
+        Log.i("info", "paused");
+    }
+
+    /**
+     * Completely stops playing Tetris theme
      */
     public void StopTetrisTheme() {
         this.setPlaying(false);
+        this.writePizeo((char) REST);
         this.closePizeo();
     }
 }

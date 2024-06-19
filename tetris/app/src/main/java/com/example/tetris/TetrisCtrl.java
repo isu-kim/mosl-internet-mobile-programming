@@ -1,5 +1,6 @@
 package com.example.tetris;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,8 +13,12 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
-import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
+import com.example.hardware.HWClass;
+import com.example.network.ScoreMgmtClass;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -44,6 +49,81 @@ public class TetrisCtrl extends View {
     int mTopScore = 0;
     public int initiatedRestart = 0;
 
+    private HWClass hwc;
+
+    private ScoreMgmtClass smc;
+
+    private void showMusicDebugDialog() {
+        this.pauseGame();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setMessage("[DEBUG] Music ON , yes this is too noisy")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Log the "Yes" choice
+                        Log.i("debug", "Music ON confirmed.");
+                        dialog.dismiss();
+                        restartGame();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Log the "No" choice
+                        Log.i("debug", "Music ON declined.");
+                        dialog.dismiss();
+                        restartGame();
+                        hwc.pc.PauseTetrisTheme();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void showUserIDSelectionDialog() {
+        hwc.dc.Open();
+        final int[] userID = {hwc.dc.GetValue()};
+        hwc.dc.Close();
+
+        this.pauseGame();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.getContext());
+        builder.setMessage("USER ID: " + userID[0])
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Do nothing but close the dialog
+                        hwc.dc.SetUserID(userID[0]);
+                        Log.i("info", "ID set +" + hwc.dc.GetUserID());
+                        dialog.dismiss();
+
+
+                        new Thread(() -> {
+                            try {
+                                mTopScore = smc.getUserInfo(hwc.dc.GetUserID());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Log.i("NET", e.toString());
+                                mTopScore = -1;
+                            }
+                        }).start();
+
+                        restartGame();
+                    }
+                })
+                .setNegativeButton("Refresh ID", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // Update the message with the new user ID
+                        hwc.dc.Open();
+                        userID[0] = hwc.dc.GetValue();
+                        hwc.dc.Close();
+                        showUserIDSelectionDialog();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     Rect getBlockArea(int x, int y) {
         Rect rtBlock = new Rect();
         rtBlock.left = (int)(x * mBlockSize);
@@ -64,8 +144,10 @@ public class TetrisCtrl extends View {
     public TetrisCtrl(Context context) {
         super(context);
         this.context = context;
-        mPref = context.getSharedPreferences("info",MODE_PRIVATE);
-        mTopScore = mPref.getInt("TopScore", 0);
+    }
+
+    public void SetHWControl(HWClass hwc) {
+        this.hwc = hwc;
     }
 
     void initVariables(Canvas canvas) {
@@ -252,14 +334,15 @@ public class TetrisCtrl extends View {
             i--;
         }
 
-
-        mScore += filledCount * filledCount;
-        if( mTopScore < mScore ) {
-            mTopScore = mScore;
-            SharedPreferences.Editor edit = mPref.edit();
-            edit.putInt("TopScore", mTopScore);
-            edit.commit();
+        if (filledCount != 0) {
+            new Thread(() -> {
+                for (int i = 0 ; i < 5 ; i++) {
+                    hwc.flc.Blink(255, 255, 255);
+                }
+            }).start();
         }
+
+        mScore += filledCount * filledCount * 100;
         return filledCount;
     }
 
@@ -290,6 +373,7 @@ public class TetrisCtrl extends View {
         return false;
     }
 
+    @SuppressLint("DefaultLocale")
     void showScore(Canvas canvas, int score) {
         int fontSize = mScreenSize.x / 20;
         Paint pnt = new Paint();
@@ -301,6 +385,28 @@ public class TetrisCtrl extends View {
 
         poxY += (int)(fontSize * 1.5);
         canvas.drawText("Top Score : " + mTopScore, posX, poxY, pnt);
+        poxY += (int)(fontSize * 1.5);
+
+        String userIdStr = "unknown";
+        String topScoreStr = "unknown";
+        if (hwc.dc.GetUserID() == -1) {
+            userIdStr = "unknown";
+        } else {
+            userIdStr = String.format("%07d", hwc.dc.GetUserID());
+        }
+
+        if (mTopScore == -1) {
+            topScoreStr = "Unknown";
+        } else {
+            topScoreStr = String.format("%06d", mTopScore);
+        }
+
+        canvas.drawText("User ID : "+ userIdStr, posX, poxY, pnt);
+
+        hwc.sc.SetScore(mScore);
+        hwc.tc.printLine1("USER ID=" + userIdStr);
+        hwc.tc.printLine2("Top Score=" + topScoreStr);
+
         // Memo: Insert Text-LCD-Code and 7seg-code here
         // TextLCD:
         // User-ID: 048b
@@ -358,7 +464,8 @@ public class TetrisCtrl extends View {
     public void pauseGame() {
         if( mDlgMsg != null )
             return;
-
+        this.hwc.pc.PauseTetrisTheme();
+        this.hwc.sc.PauseScoring();
         mTimerFrame.removeMessages(0);
     }
 
@@ -366,32 +473,63 @@ public class TetrisCtrl extends View {
         if( mDlgMsg != null )
             return;
 
+        this.hwc.pc.ResumeTetrisTheme();
+        this.hwc.sc.ResumeScoring();
         mTimerFrame.sendEmptyMessageDelayed(0, 1000);
     }
 
     public void startGame() {
-        mScore = 0;
-
-        for(int i=0; i < MatrixSizeV; i++) {
-            for(int j=0; j < MatrixSizeH; j++) {
+        mScore = 1000;
+        for (int i = 0; i < MatrixSizeV; i++) {
+            for (int j = 0; j < MatrixSizeH; j++) {
                 mArMatrix[i][j] = 0;
             }
         }
+
+        this.hwc.pc.PlayTetrisTheme();
+        this.hwc.sc.StartScore();
+        this.hwc.tc.Init();
+        this.smc = new ScoreMgmtClass("http://220.149.231.241:8989");
 
         addNewBlock(mArNewBlock);
         addNewBlock(mArNextBlock);
         TimerGapNormal = TimerGapStart;
         mTimerFrame.sendEmptyMessageDelayed(0, 10);
         // Memo: Get dipswitch ID here and get top score from aws
+
+        // @todo, remove this
+        //showMusicDebugDialog();
+        showUserIDSelectionDialog();
     }
 
     /*** Interface end ***/
 
     void showDialog_GameOver() {
         initiatedRestart = 0;
+
+        this.hwc.pc.StopTetrisTheme();
+        this.hwc.sc.StopScore();
+        this.hwc.tc.UnInit();
+
+        String gameOverMessage = "Game over! Your score is " + mScore;
+        // Highest score logic
+        if (mScore > mTopScore) {
+            mTopScore = mScore;
+            gameOverMessage = "Congrats! Highest score " + mScore;
+            new Thread(() -> {
+                try {
+                    smc.uploadScore(hwc.dc.GetUserID(), mTopScore);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("NET", e.toString());
+                    mTopScore = -1;
+                }
+            }).start();
+        }
+
         mDlgMsg = new AlertDialog.Builder(context)
                 .setTitle("Notice")
-                .setMessage("Game over! Your score is " + mScore)
+                .setMessage(gameOverMessage)
                 .setPositiveButton("Again",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -486,5 +624,4 @@ public class TetrisCtrl extends View {
         pnt.setColor(crBlock);
         canvas.drawRect(rtBlock, pnt);
     }
-
 }

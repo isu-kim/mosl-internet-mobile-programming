@@ -1,19 +1,25 @@
 package com.example.tetris;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.RelativeLayout;
+
+import com.example.hardware.HWClass;
+import com.example.network.AdMgmtClass;
 
 public class MainActivity extends Activity {
     TetrisCtrl mTetrisCtrl;
@@ -22,63 +28,90 @@ public class MainActivity extends Activity {
     int mCellSize = 0;
     boolean mIsTouchMove = false;
 
-    // Used to load the 'hb_test' library on application startup.
+    // JNI Methods
+    HWClass hwc = new HWClass();
+    AdMgmtClass amc = new AdMgmtClass("http://aws.bongers.kr");
+
+
     static {
         System.loadLibrary("tetris");
     }
 
-    public native String stringFromJNI();
+    public native String stringFromJNI(); // @todo: remove this, just for debugging.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("[INFO]", "onCreate");
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(this /* MyActivity */, stringFromJNI(), duration);
-        toast.show();
+        // @todo: remove this, just for debugging
+        //int duration = Toast.LENGTH_SHORT;
+        //Toast toast = Toast.makeText(this /* MyActivity */, stringFromJNI(), duration);
+        //toast.show();
+        // @todo: till here
 
         DisplayMetrics dm = this.getApplicationContext().getResources().getDisplayMetrics();
         mScreenSize.x = dm.widthPixels;
         mScreenSize.y = dm.heightPixels;
         mCellSize = (int)(mScreenSize.x / 8);
 
+        initAd();
         initTetrisCtrl();
+    }
+    void initAd() {
+        new Thread(() -> {
+            try {
+                this.amc.requestIndexHtml();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.i("ADS", "failed to retrieve index");
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (this.amc.isPlaying) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                try {
+                    Bitmap img = this.amc.getRandomAd();
+
+                    runOnUiThread(() -> {
+                        ImageView ad = findViewById(R.id.adSection);
+                        ad.setImageBitmap(img);
+                        ad.setOnClickListener(v -> {
+                            String url = this.amc.getCurrentAdURL();
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            v.getContext().startActivity(browserIntent);
+                        });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("AD", e.toString());
+                }
+            }
+        }).start();
     }
 
     void initTetrisCtrl() {
         mTetrisCtrl = new TetrisCtrl(this);
+        mTetrisCtrl.SetHWControl(hwc);
         for(int i=0; i <= 7; i++) {
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.cell0 + i);
             mTetrisCtrl.addCellImage(i, bitmap);
         }
+
         RelativeLayout layoutCanvas = findViewById(R.id.layoutCanvas);
         layoutCanvas.addView(mTetrisCtrl);
     }
 
-
-
-    //    void onClick(View view) {
-//        switch( view.getId() ) {
-//            /*case R.id.bt_pause :
-//                mTetrisCtrl.pauseGame();
-//                break;
-//            case R.id.bt_restart:
-//                Log.d("myTag", "restart pressed");
-//                mTetrisCtrl.showDialog_GameOver();
-//                break;
-//            case R.id.btnBottom :
-//                mTetrisCtrl.block2Bottom();
-//                break;*/
-//            /*case R.id.btnRotate :
-//                mTetrisCtrl.block2Rotate();
-//                break;*/
-//        }
-//    }
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
@@ -148,5 +181,4 @@ public class MainActivity extends Activity {
         super.onRestart();
         mTetrisCtrl.restartGame();
     }
-
 }

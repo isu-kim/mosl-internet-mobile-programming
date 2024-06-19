@@ -1,6 +1,10 @@
 #include <jni.h>
 
 #include "piezo.cpp"
+#include "segment.cpp"
+#include "dipsw.cpp"
+#include "textlcd.cpp"
+#include "fullcolorled.cpp"
 
 extern "C"
 JNIEXPORT jstring JNICALL

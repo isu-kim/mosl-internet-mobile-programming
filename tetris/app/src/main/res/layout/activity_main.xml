@@ -7,9 +7,7 @@
         android:id="@+id/layoutCanvas"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/layoutControl">
-
-    </RelativeLayout>
+        android:layout_above="@+id/layoutControl"/>
 
     <LinearLayout
         android:id="@+id/layoutControl"
