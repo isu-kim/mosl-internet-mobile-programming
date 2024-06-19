@@ -479,7 +479,7 @@ public class TetrisCtrl extends View {
     }
 
     public void startGame() {
-        mScore = 17456;
+        mScore = 1000;
         for (int i = 0; i < MatrixSizeV; i++) {
             for (int j = 0; j < MatrixSizeH; j++) {
                 mArMatrix[i][j] = 0;
@@ -508,7 +508,8 @@ public class TetrisCtrl extends View {
         initiatedRestart = 0;
 
         this.hwc.pc.StopTetrisTheme();
-
+        this.hwc.sc.StopScore();
+        this.hwc.tc.UnInit();
 
         String gameOverMessage = "Game over! Your score is " + mScore;
         // Highest score logic
@@ -525,7 +526,6 @@ public class TetrisCtrl extends View {
                 }
             }).start();
         }
-
 
         mDlgMsg = new AlertDialog.Builder(context)
                 .setTitle("Notice")
@@ -624,5 +624,4 @@ public class TetrisCtrl extends View {
         pnt.setColor(crBlock);
         canvas.drawRect(rtBlock, pnt);
     }
-
 }

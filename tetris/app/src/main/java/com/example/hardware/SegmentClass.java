@@ -50,6 +50,9 @@ public class SegmentClass {
     }
 
     public void StartScore() {
+        this.isPlaying = true;
+        this.isPaused = false;
+
         Thread scoreThread = new Thread(new Runnable() {
             @Override
             public void run() {

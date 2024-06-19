@@ -151,6 +151,7 @@ public class PiezoClass {
      * Starts playing tetris theme in another thread
      */
     public void PlayTetrisTheme() {
+        this.isPlaying = true;
         Thread tetrisThread = new Thread(new Runnable() {
             @Override
             public void run() {

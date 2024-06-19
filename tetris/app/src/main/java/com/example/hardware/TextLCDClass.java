@@ -18,7 +18,7 @@ public class TextLCDClass {
         this.on();
     }
 
-    public void Uninit() {
+    public void UnInit() {
         this.clear();
         this.off();
     }
