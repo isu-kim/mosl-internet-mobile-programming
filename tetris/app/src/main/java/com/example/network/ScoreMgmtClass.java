@@ -1,7 +1,10 @@
 package com.example.network;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONObject;
@@ -44,6 +47,45 @@ public class ScoreMgmtClass {
             return score;
         } else {
             throw new RuntimeException("Failed : HTTP error code : " + responseCode);
+        }
+    }
+    public void uploadScore(long userId, int score) throws Exception {
+        String urlString = baseUrl + UPLOAD_SCORE;
+        URL url = new URL(urlString);
+        HttpURLConnection conn = null;
+
+        try {
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+
+            // Create JSON payload
+            JSONObject jsonPayload = new JSONObject();
+            jsonPayload.put("user_id", userId);
+            jsonPayload.put("score", score);
+
+            // Write JSON payload to the connection
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = jsonPayload.toString().getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            // Check HTTP response code
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
+                System.out.println("Score uploaded successfully for user " + userId);
+            } else {
+                throw new RuntimeException("Failed : HTTP error code : " + responseCode);
+            }
+        } catch (Exception e) {
+            // Handle exceptions appropriately
+            e.printStackTrace();
+            throw e; // Rethrow the exception to propagate it
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
 }

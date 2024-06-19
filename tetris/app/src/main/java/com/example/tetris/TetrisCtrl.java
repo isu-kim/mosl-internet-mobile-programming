@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.hardware.HWClass;
 import com.example.network.ScoreMgmtClass;
@@ -143,8 +144,6 @@ public class TetrisCtrl extends View {
     public TetrisCtrl(Context context) {
         super(context);
         this.context = context;
-        mPref = context.getSharedPreferences("info",MODE_PRIVATE);
-        mTopScore = mPref.getInt("TopScore", 0);
     }
 
     public void SetHWControl(HWClass hwc) {
@@ -336,12 +335,6 @@ public class TetrisCtrl extends View {
         }
 
         mScore += filledCount * filledCount * 100;
-        if( mTopScore < mScore ) {
-            mTopScore = mScore;
-            SharedPreferences.Editor edit = mPref.edit();
-            edit.putInt("TopScore", mTopScore);
-            edit.commit();
-        }
         return filledCount;
     }
 
@@ -397,7 +390,7 @@ public class TetrisCtrl extends View {
         if (mTopScore == -1) {
             topScoreStr = "Unknown";
         } else {
-            topScoreStr = String.format("%6d", mTopScore);
+            topScoreStr = String.format("%06d", mTopScore);
         }
 
         canvas.drawText("User ID : "+ userIdStr, posX, poxY, pnt);
@@ -405,7 +398,6 @@ public class TetrisCtrl extends View {
         hwc.sc.SetScore(mScore);
         hwc.tc.printLine1("USER ID=" + userIdStr);
         hwc.tc.printLine2("Top Score=" + topScoreStr);
-
 
         // Memo: Insert Text-LCD-Code and 7seg-code here
         // TextLCD:
@@ -479,7 +471,7 @@ public class TetrisCtrl extends View {
     }
 
     public void startGame() {
-        mScore = 1450;
+        mScore = 17456;
         for (int i = 0; i < MatrixSizeV; i++) {
             for (int j = 0; j < MatrixSizeH; j++) {
                 mArMatrix[i][j] = 0;
@@ -508,9 +500,28 @@ public class TetrisCtrl extends View {
         initiatedRestart = 0;
 
         this.hwc.pc.StopTetrisTheme();
+
+
+        String gameOverMessage = "Game over! Your score is " + mScore;
+        // Highest score logic
+        if (mScore > mTopScore) {
+            mTopScore = mScore;
+            gameOverMessage = "Congrats! Highest score " + mScore;
+            new Thread(() -> {
+                try {
+                    smc.uploadScore(hwc.dc.GetUserID(), mTopScore);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.i("NET", e.toString());
+                    mTopScore = -1;
+                }
+            }).start();
+        }
+
+
         mDlgMsg = new AlertDialog.Builder(context)
                 .setTitle("Notice")
-                .setMessage("Game over! Your score is " + mScore)
+                .setMessage(gameOverMessage)
                 .setPositiveButton("Again",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
