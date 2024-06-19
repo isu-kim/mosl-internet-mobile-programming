@@ -2,10 +2,12 @@ package com.example.tetris;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -86,6 +88,11 @@ public class MainActivity extends Activity {
                     runOnUiThread(() -> {
                         ImageView ad = findViewById(R.id.adSection);
                         ad.setImageBitmap(img);
+                        ad.setOnClickListener(v -> {
+                            String url = this.amc.getCurrentAdURL();
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            v.getContext().startActivity(browserIntent);
+                        });
                     });
                 } catch (Exception e) {
                     e.printStackTrace();

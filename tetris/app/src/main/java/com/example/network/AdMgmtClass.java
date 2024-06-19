@@ -26,6 +26,7 @@ public class AdMgmtClass {
 
     public volatile boolean isPlaying = true;
 
+    public String currentAd;
 
     private final List<String> adRequestStrings = new ArrayList<>();
 
@@ -64,7 +65,8 @@ public class AdMgmtClass {
         }
 
         Random randomizer = new Random();
-        return adRequestStrings.get(randomizer.nextInt(adRequestStrings.size()));
+        this.currentAd = adRequestStrings.get(randomizer.nextInt(adRequestStrings.size()));
+        return this.currentAd;
     }
 
     public Bitmap getRandomAd() {
@@ -96,6 +98,10 @@ public class AdMgmtClass {
                 }
             }
         }).start();
+    }
+
+    public String getCurrentAdURL() {
+        return this.baseUrl + ADS_Endpoint + "/" + this.currentAd + ".html";
     }
 
     public synchronized void StopAd() {
