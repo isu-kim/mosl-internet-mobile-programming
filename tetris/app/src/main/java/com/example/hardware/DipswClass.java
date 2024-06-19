@@ -7,7 +7,7 @@ public class DipswClass {
     private native void closeDipsw();
     private native int getDipsw();
 
-    private int userID = -1;
+    private long userID = -1;
 
     public DipswClass() {
         System.loadLibrary("tetris");
@@ -32,7 +32,7 @@ public class DipswClass {
         this.userID = userID;
     }
 
-    public int GetUserID() {
+    public long GetUserID() {
         return this.userID;
     }
 }

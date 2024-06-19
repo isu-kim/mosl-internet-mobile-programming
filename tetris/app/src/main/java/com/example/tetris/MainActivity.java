@@ -82,9 +82,7 @@ public class MainActivity extends Activity {
 
                 try {
                     Bitmap img = this.amc.getRandomAd();
-                    Log.i("AD", "downloaded img");
 
-                    // Update the ImageView on the UI thread
                     runOnUiThread(() -> {
                         ImageView ad = findViewById(R.id.adSection);
                         ad.setImageBitmap(img);

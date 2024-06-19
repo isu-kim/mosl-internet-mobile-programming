@@ -23,7 +23,7 @@ public class ScoreMgmtClass {
         this.baseUrl = baseUrl;
     }
 
-    public int getUserInfo(int userId) throws Exception {
+    public int getUserInfo(long userId) throws Exception {
         String urlString = baseUrl + USER_INFO_ENDPOINT + "?userid=" + userId;
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();

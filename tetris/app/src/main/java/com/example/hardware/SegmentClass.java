@@ -8,8 +8,8 @@ public class SegmentClass {
     private native void writeSegment(int num);
     private native void closeSegment();
 
-    private volatile boolean isPlaying = true;
-    private volatile boolean isPaused = false;
+    private boolean isPlaying = true;
+    private boolean isPaused = false;
 
     private int score = 0;
 
@@ -21,7 +21,7 @@ public class SegmentClass {
      * Check if the music is playing
      * @return bool value whether the music shall be playing
      */
-    public synchronized boolean isPlaying() {
+    public boolean isPlaying() {
         return isPlaying;
     }
 
@@ -29,7 +29,7 @@ public class SegmentClass {
      * Set if the music shall be playing
      * @param isPlaying the value to set
      */
-    public synchronized void setPlaying(boolean isPlaying) {
+    public void setPlaying(boolean isPlaying) {
         this.isPlaying = isPlaying;
     }
 
@@ -37,7 +37,7 @@ public class SegmentClass {
      * Check if music is paused
      * @return isPaused
      */
-    public synchronized boolean isPaused() {
+    public boolean isPaused() {
         return isPaused;
     }
 
@@ -45,7 +45,7 @@ public class SegmentClass {
      * Set music playing pause.
      * @param isPaused The value to set.
      */
-    public synchronized void setIsPaused(boolean isPaused) {
+    public void setIsPaused(boolean isPaused) {
         this.isPaused = isPaused;
     }
 
@@ -64,30 +64,42 @@ public class SegmentClass {
         scoreThread.start();
     }
 
-    public void loopScoring() {
-        while (this.isPlaying()) {
-            Log.i("info", String.valueOf(this.GetScore()));
-            this.writeSegment(this.GetScore());
-        }
+    private void loopScoring() {
+        while (true) {
+                if (!isPlaying) {
+                    break;
+                }
+                if (!isPaused) {
+                    Log.i("SCORE", "JNI" + GetScore());
+                    writeSegment(GetScore());
+                }
+            }
+            try {
+                Thread.sleep(1); // Adjust sleep time as needed
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
     }
 
-    public synchronized void SetScore(int score) {
+    public void SetScore(int score) {
+        Log.i("SCORE", "set score to " + score);
         this.score = score;
     }
 
-    public synchronized int GetScore(){
+    public int GetScore() {
         return this.score;
     }
 
-    public synchronized void ResumeScoring() {
-        this.isPlaying = true;
+    public void ResumeScoring() {
+        this.isPaused = false;
     }
 
-    public synchronized void PauseScoring() {
-        this.isPlaying = false;
+    public void PauseScoring() {
+        this.isPaused = true;
     }
 
-    public synchronized void StopScore() {
+    public void StopScore() {
         this.isPlaying = false;
         this.writeSegment(0);
         this.closeSegment();
