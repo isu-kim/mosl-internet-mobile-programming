@@ -42,7 +42,36 @@ func userInfoHandler(db *DB, w http.ResponseWriter, r *http.Request) {
 
 	users, err := db.QueryAllRecords()
 	if err != nil {
-		http.Error(w, "error querying user info", http.StatusInternalServerError)
+		http.Error(w, "error querying user info: %v", http.StatusInternalServerError)
+		return
+	}
+
+	for _, user := range users {
+		if user.UserID == userID {
+			json.NewEncoder(w).Encode(user)
+			return
+		}
+	}
+
+	log.Printf("Adding user %d, score %d", userID, 0)
+
+	if userID > 0 && userID < 65536 {
+		_, err := db.InsertRecord(User{
+			UserID: userID,
+			Score:  0,
+		})
+
+		log.Printf("New user %d added, score %d", userID, 0)
+
+		if err != nil {
+			http.Error(w, "unable to add user", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	users, err = db.QueryAllRecords()
+	if err != nil {
+		http.Error(w, "error querying user info: %v", http.StatusInternalServerError)
 		return
 	}
 

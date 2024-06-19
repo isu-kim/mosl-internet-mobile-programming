@@ -1,5 +1,6 @@
 package com.example.tetris;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.hardware.HWClass;
+import com.example.network.ScoreMgmtClass;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -47,6 +49,8 @@ public class TetrisCtrl extends View {
     public int initiatedRestart = 0;
 
     private HWClass hwc;
+
+    private ScoreMgmtClass smc;
 
     private void showMusicDebugDialog() {
         this.pauseGame();
@@ -91,6 +95,18 @@ public class TetrisCtrl extends View {
                         hwc.dc.SetUserID(userID[0]);
                         Log.i("info", "ID set +" + hwc.dc.GetUserID());
                         dialog.dismiss();
+
+
+                        new Thread(() -> {
+                            try {
+                                mTopScore = smc.getUserInfo(hwc.dc.GetUserID());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Log.i("NET", e.toString());
+                                mTopScore = -1;
+                            }
+                        }).start();
+
                         restartGame();
                     }
                 })
@@ -356,6 +372,7 @@ public class TetrisCtrl extends View {
         return false;
     }
 
+    @SuppressLint("DefaultLocale")
     void showScore(Canvas canvas, int score) {
         int fontSize = mScreenSize.x / 20;
         Paint pnt = new Paint();
@@ -370,17 +387,26 @@ public class TetrisCtrl extends View {
         poxY += (int)(fontSize * 1.5);
 
         String userIdStr = "unknown";
+        String topScoreStr = "unknown";
         if (hwc.dc.GetUserID() == -1) {
             userIdStr = "unknown";
         } else {
             userIdStr = String.format("%07d", hwc.dc.GetUserID());
         }
 
+        if (mTopScore == -1) {
+            topScoreStr = "Unknown";
+        } else {
+            topScoreStr = String.format("%6d", mTopScore);
+        }
+
         canvas.drawText("User ID : "+ userIdStr, posX, poxY, pnt);
 
         hwc.sc.SetScore(mScore);
-        hwc.tc.printLine1("USER ID: " + userIdStr);
-        hwc.tc.printLine2("Max Score: " + 1234);
+        hwc.tc.printLine1("USER ID=" + userIdStr);
+        hwc.tc.printLine2("Top Score=" + topScoreStr);
+
+
         // Memo: Insert Text-LCD-Code and 7seg-code here
         // TextLCD:
         // User-ID: 048b
@@ -454,8 +480,8 @@ public class TetrisCtrl extends View {
 
     public void startGame() {
         mScore = 1450;
-        for(int i=0; i < MatrixSizeV; i++) {
-            for(int j=0; j < MatrixSizeH; j++) {
+        for (int i = 0; i < MatrixSizeV; i++) {
+            for (int j = 0; j < MatrixSizeH; j++) {
                 mArMatrix[i][j] = 0;
             }
         }
@@ -463,6 +489,7 @@ public class TetrisCtrl extends View {
         this.hwc.pc.PlayTetrisTheme();
         this.hwc.sc.StartScore();
         this.hwc.tc.Init();
+        this.smc = new ScoreMgmtClass("http://220.149.231.241:8989");
 
         addNewBlock(mArNewBlock);
         addNewBlock(mArNextBlock);

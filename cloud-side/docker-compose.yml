@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: Tetris
+      MYSQL_USER: tetrisuser
+      MYSQL_PASSWORD: tetrispass
+    command: --default-authentication-plugin=mysql_native_password
+
+  api:
+    image: isukim/mcs:v0.7
+    container_name: api
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: Tetris
+      DB_USER: tetrisuser
+      DB_PASS: tetrispass
+    ports:
+      - "8989:8080"
+    depends_on:
+      - mysql
+

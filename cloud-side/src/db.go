@@ -38,9 +38,29 @@ func NewDB(dsn string) (*DB, error) {
 
 	// Create a new DB instance and assign it to the global db variable
 	ret := &DB{mdb}
-	db = ret
 
+	err = ret.createDatabaseIfNotExists()
+	if err != nil {
+		return nil, err
+	}
+
+	err = ret.createTableIfNotExists()
+	if err != nil {
+		return nil, err
+	}
+
+	db = ret
 	return ret, nil
+}
+
+// createDatabaseIfNotExists creates the database if it does not already exist
+func (db *DB) createDatabaseIfNotExists() error {
+	_, err := db.Exec("CREATE DATABASE IF NOT EXISTS " + DBName)
+	if err != nil {
+		return logError("error creating database", err)
+	}
+	log.Println("Database created or already exists")
+	return nil
 }
 
 // createTableIfNotExists creates the tetris table if it does not exist
