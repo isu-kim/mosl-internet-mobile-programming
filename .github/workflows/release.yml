@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Setup Docker Build
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Get tag
+      id: tag
+      run: |
+        if [ ${{ github.ref }} == "refs/heads/main" ]; then
+          echo "tag=latest" >> $GITHUB_OUTPUT
+        else
+          echo "tag=tmp" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Build Backend Image
+      working-directory: ./cloud-side
+      run: |
+        
+         docker build -t isukim/mcs:${{ steps.tag.outputs.tag }}
+
+    - name: Push Backend Image
+       run: |
+          docker push isukim/mcs:${{ steps.tag.outputs.tag }}
