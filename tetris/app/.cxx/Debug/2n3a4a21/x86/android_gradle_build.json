@@ -1,0 +1,38 @@
+{
+  "buildFiles": [
+    "/Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/gim-isu/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/.cxx/Debug/2n3a4a21/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/gim-isu/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/.cxx/Debug/2n3a4a21/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "tetris::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86",
+      "artifactName": "tetris",
+      "output": "/Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/build/intermediates/cxx/Debug/2n3a4a21/obj/x86/libtetris.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/gim-isu/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/gim-isu/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

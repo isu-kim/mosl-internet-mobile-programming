@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/.cxx/Debug/2n3a4a21/x86",
+  "command": "/Users/gim-isu/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=i686-none-linux-android16 --gcc-toolchain=/Users/gim-isu/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/gim-isu/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -Dtetris_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles/tetris.dir/tetris.cpp.o -c /Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/src/main/cpp/tetris.cpp",
+  "file": "/Users/gim-isu/Documents/GitHub/mosl-internet-mobile-programming-new/tetris/app/src/main/cpp/tetris.cpp"
+}
+]
