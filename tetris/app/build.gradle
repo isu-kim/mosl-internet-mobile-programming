@@ -30,6 +30,10 @@ android {
             version '3.22.1'
         }
     }
+
+    lintOptions {
+        warning 'deprecation'
+    }
 }
 
 dependencies {
