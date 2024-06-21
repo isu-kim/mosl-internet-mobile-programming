@@ -33,7 +33,7 @@ jobs:
     - name: Build Backend Image
       working-directory: ./cloud-side
       run: |
-         docker build -t isukim/mcs:${{ steps.tag.outputs.tag }}
+         docker build -t isukim/mcs:${{ steps.tag.outputs.tag }} .
 
     - name: Push Backend Image
       run: |
