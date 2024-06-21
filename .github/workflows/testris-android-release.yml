@@ -38,14 +38,14 @@ jobs:
         ./gradlew clean
         ./gradlew build
 
-    - name: Prepair Upload APK
+    - name: Prepare Upload APK
       working-directory: tetris/app/build/outputs/apk/release/
       run: mv app-release-unsigned.apk tetris-hbe.apk
 
     - name: Get Release Tag
       id: tag
       run: |
-        if [ ${{ github.ref }} == "refs/heads/main" ]; then
+        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
           echo "tag=latest" >> $GITHUB_OUTPUT
         else
           echo "tag=tmp" >> $GITHUB_OUTPUT
@@ -63,3 +63,13 @@ jobs:
           Release via GitHub Actions
         draft: false
         prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: tetris/app/build/outputs/apk/release/tetris-hbe.apk
+        asset_name: tetris-hbe.apk
+        asset_content_type: application/vnd.android.package-archive
