@@ -37,8 +37,7 @@ jobs:
       run: gradlew build
 
     - name: Upload APK
-      working-directory: tetris
       uses: actions/upload-artifact@v3
       with:
         name: app-apk
-        path: app/build/outputs/apk/debug/
+        path: tetris/app/build/outputs/apk/debug/
