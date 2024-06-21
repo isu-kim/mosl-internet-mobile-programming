@@ -34,5 +34,5 @@ jobs:
           ${{ runner.os }}-gradle-
 
     - name: Build with Gradle
-      working-directory: tetrris
+      working-directory: tetris
       run: ./gradlew build
