@@ -32,7 +32,7 @@ jobs:
       run: chmod +x ./tetris/gradlew
 
     - name: Build with Gradle
-      run: ./tetris/gradlew assembleDebug
+      run: ./tetris/gradlew build
 
     - name: Upload APK
       uses: actions/upload-artifact@v3
