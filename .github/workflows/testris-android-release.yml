@@ -29,13 +29,16 @@ jobs:
         build-tools: 34.0.0  # Adjust to appropriate build tools version
 
     - name: Grant execute permission for gradlew
-      run: chmod +x ./tetris/gradlew
+      working-directory: tetris
+      run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./tetris/gradlew build
+      working-directory: tetris
+      run: gradlew build
 
     - name: Upload APK
+      working-directory: tetris
       uses: actions/upload-artifact@v3
       with:
         name: app-apk
-        path: ./tetris/app/build/outputs/apk/debug/
+        path: app/build/outputs/apk/debug/
