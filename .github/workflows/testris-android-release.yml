@@ -68,3 +68,4 @@ jobs:
         asset_path: tetris/app/build/outputs/apk/release/tetris-hbe.apk
         asset_name: tetris-hbe.apk
         asset_content_type: application/vnd.android.package-archive
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
