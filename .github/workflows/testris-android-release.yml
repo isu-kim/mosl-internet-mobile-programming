@@ -1,29 +1,41 @@
-name: Android CI
+name: Android APK Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 18
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 18
       uses: actions/setup-java@v3
       with:
         java-version: '18'
-        distribution: 'oracle'
-        cache: gradle
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+      with:
+        api-level: 34  # Set to compileSdk version
+        build-tools: 34.0.0  # Adjust to appropriate build tools version
 
     - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-      working-directory: tetris
+      run: chmod +x ./tetris/gradlew
 
     - name: Build with Gradle
-      working-directory: tetris
-      run: ./gradlew build
+      run: ./tetris/gradlew assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-apk
+        path: ./tetris/app/build/outputs/apk/debug/
